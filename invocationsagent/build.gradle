@@ -1,0 +1,57 @@
+apply plugin: 'java'
+
+group = 'warek'
+sourceCompatibility = 1.8
+
+dependencies {
+    compile group: 'net.bytebuddy', name: 'byte-buddy', version: '1.9.12'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.2'
+}
+
+jar {
+    manifest {
+        attributes(
+                'Manifest-Version': 1.0,
+                'Premain-Class': 'warek.javaagent.AgentMain',
+                'Agent-Class': 'warek.javaagent.AgentMain',
+                /**
+                 * --------------------------------------------------------------------------------------------------
+                 * https://stackoverflow.com/questions/19009583/difference-between-redefine-and-retransform-in-javaagent/39177699
+                 * --------------------------------------------------------------------------------------------------
+                 *
+                 * Redefinition means that at an arbitrary point of time an agent will invoke Instrumentation.
+                 * redefineClasses to change the actual definition of existing (and already loaded) classes.
+                 * The agent will provide the bytecode for the new definition.
+                 *
+                 * Retransformation refers to the process of class file transformation which is normally
+                 * applied at class loading time. Agents can register ClassFileTransformers which are called
+                 * one after another to apply transformations to the byte code before the class will be initialized.
+                 * So Retransformation refers to the capability of the JVM to repeat this process for already
+                 * loaded classes. In this case an agent may invoke Instrumentation.retransformClasses specifying
+                 * which classes to retransform but no bytecode. Instead the JVM will call all registered
+                 * retransforming capable ClassFileTransformers providing the actual bytecode (or the result of
+                 * the previous transformer for a chained transformer).
+                 *
+                 * (...)
+                 *
+                 * Notice that redefinition capabilities were introduced in Java 5, and retransformation in Java 6.
+                 * My guess is that retransformation was introduced as a more general capability, but redefinition
+                 * had to be retained for backwards compatibility.
+                 *
+                 * --------------------------------------------------------------------------------------------------
+                 *  http://mail.openjdk.java.net/pipermail/serviceability-dev/2008-May/000131.html
+                 * --------------------------------------------------------------------------------------------------
+                 *
+                 * The main motivation and benefit of retransformClasses is that it allows
+                 * multiple instrumentation agents to co-exist.
+                 */
+                'Can-Retransform-Classes' : true,
+                'Can-Redefine-Classes': false
+        )
+    }
+}
+
+project.ext {
+    jarPath = jar.archivePath
+}
+

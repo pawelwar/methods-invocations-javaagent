@@ -1,0 +1,23 @@
+allprojects {
+    repositories {
+	maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+        jcenter()
+    }
+}
+
+repositories {
+    maven { url "http://clojars.org/repo" }
+    mavenCentral()
+}
+
+subprojects {
+    apply plugin: 'java'
+}
+
+project(':someapplication') {
+    dependencies {
+        implementation project(':invocationsagent')
+    }
+}

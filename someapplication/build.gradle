@@ -1,0 +1,16 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+application {
+    mainClassName = 'warek.application.AppMain'
+}
+
+applicationDefaultJvmArgs = ["-javaagent:${project(':invocationsagent').jarPath}"]
